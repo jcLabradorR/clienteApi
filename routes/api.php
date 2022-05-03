@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Auth\AuthManager;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\V1\CustomerController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -21,6 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/', [CustomerController::class, 'index']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/userInfo', [AuthController::class, 'userInfo'])->middleware('auth:sanctum');
+Route::get('/customer/{dni}', [CustomerController::class, 'show']);
