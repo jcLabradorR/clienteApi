@@ -41,7 +41,18 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $customer = new Customer();
+        $customer->dni = $request->dni;
+        $customer->id_reg = $request->id_reg;
+        $customer->id_com = $request->id_com;
+        $customer->email = $request->email;
+        $customer->name = $request->name;
+        $customer->last_name = $request->last_name;
+        $customer->address = $request->address;
+        $customer->date_reg = $request->date_reg;
+        $customer->status = $request->status;
+
+        $customer->save();
     }
 
     /**
@@ -111,8 +122,9 @@ class CustomerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        //
+        $customer = Customer::destroy($request->dni);
+        return $customer;
     }
 }

@@ -26,4 +26,6 @@ Route::get('/', [CustomerController::class, 'index']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/userInfo', [AuthController::class, 'userInfo'])->middleware('auth:sanctum');
+Route::post('/customer/create', [CustomerController::class, 'store']);
 Route::get('/customer/{dni}', [CustomerController::class, 'show']);
+Route::post('/customer/delete/{dni}', [CustomerController::class, 'destroy']);
