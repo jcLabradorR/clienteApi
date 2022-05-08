@@ -8,6 +8,7 @@ use Illuminate\Support\Arr;
 use App\Models\Customer;
 use App\Models\Commune;
 use App\Models\Region;
+use App\Http\Requests\CustomerCreateRequest;
 use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
@@ -39,7 +40,7 @@ class CustomerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CustomerCreateRequest $request)
     {
         $customer = new Customer();
         $customer->dni = $request->dni;
