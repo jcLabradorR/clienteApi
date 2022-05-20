@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use App\Models\Customer;
 use App\Models\Commune;
 use App\Models\Region;
 use App\Http\Requests\CustomerCreateRequest;
+use App\Http\Resources\Api\V1\CustomerResource;
 use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
@@ -20,8 +20,26 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = Customer::all();
-        return $customers;
+        $statusAct = "A";
+
+        $customersAct = DB::table('customers')
+            ->join('regions', 'regions.id', 'customers.id_reg')
+            ->join('communes', 'communes.id', 'customers.id_com')
+            ->select('customers.name', 'customers.last_name', 'customers.address', 'regions.description as region', 'communes.description as comuna')
+            ->where('customers.status', $statusAct)
+            ->paginate();
+
+        if(Customer::count() > 0){
+                return response()->json([
+                    'data' => $customersAct,
+                    'success' => true,
+                ], 200);
+        }
+        
+        return response()->json([
+            'message' => 'No se encontraron registros',
+            'success' => false,
+        ], 200);
     }
 
     /**
@@ -53,7 +71,19 @@ class CustomerController extends Controller
         $customer->date_reg = $request->date_reg;
         $customer->status = $request->status;
 
-        $customer->save();
+        $customerNew = $customer->save();
+
+        if($customerNew){
+            return response()->json([
+                'message' => 'Customer creado correctamente',
+                'success' => true
+            ], 201);
+        }
+        return response()->json([
+            'message' => 'Error to create post',
+            'success' => false
+        ], 500);
+       
     }
 
     /**

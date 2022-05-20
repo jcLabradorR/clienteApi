@@ -17,7 +17,7 @@ class CreateCustomersTable extends Migration
             $table->string('dni', 45)->primary();
             $table->unsignedBigInteger('id_reg');
             $table->unsignedBigInteger('id_com');
-            $table->string('email', 20);
+            $table->string('email', 120);
             $table->string('name', 45);
             $table->string('last_name', 45);
             $table->string('address', 255);
