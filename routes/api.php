@@ -22,10 +22,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/', [CustomerController::class, 'index']);
+Route::get('/', [CustomerController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/userInfo', [AuthController::class, 'userInfo'])->middleware('auth:sanctum');
-Route::post('/customer/create', [CustomerController::class, 'store']);
-Route::get('/customer/{dni}', [CustomerController::class, 'show']);
-Route::post('/customer/delete/{dni}', [CustomerController::class, 'destroy']);
+Route::post('/customer/create', [CustomerController::class, 'store'])->middleware('auth:sanctum');
+Route::get('/customer/{dni}', [CustomerController::class, 'show'])->middleware('auth:sanctum');
+Route::post('/customer/delete/{dni}', [CustomerController::class, 'destroy'])->middleware('auth:sanctum');

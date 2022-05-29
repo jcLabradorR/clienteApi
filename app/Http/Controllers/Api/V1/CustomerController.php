@@ -10,6 +10,7 @@ use App\Models\Region;
 use App\Http\Requests\CustomerCreateRequest;
 use App\Http\Resources\Api\V1\CustomerResource;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
 {
@@ -20,6 +21,8 @@ class CustomerController extends Controller
      */
     public function index()
     {
+        Log::debug('Mensaje de prueba');
+
         $statusAct = "A";
 
         $customersAct = DB::table('customers')
@@ -39,7 +42,7 @@ class CustomerController extends Controller
         return response()->json([
             'message' => 'No se encontraron registros',
             'success' => false,
-        ], 200);
+        ], 204);
     }
 
     /**
@@ -80,7 +83,7 @@ class CustomerController extends Controller
             ], 201);
         }
         return response()->json([
-            'message' => 'Error to create post',
+            'message' => 'Error Al crear customer',
             'success' => false
         ], 500);
        
@@ -94,7 +97,9 @@ class CustomerController extends Controller
      */
     public function show(Request $request)
     {
-        $customers = Customer::find($request->dni);
+        try {
+            $customers = Customer::findOrFail($request->dni);
+        $dni = $customers->dni;
         $name = $customers->name;
         $lastName = $customers->last_name;
         $regionCustomers = $customers->id_reg;
@@ -115,13 +120,20 @@ class CustomerController extends Controller
         $communeCust = $commune->first();
 
         return response()->json([
-            'Dni' => $customers->dni,
+            'Dni' => $dni,
             'Nombre completo' => $name. ' '. $lastName,
             'email' => $customers->email,
             'direccion' => $customers->address,
             'region' =>  $regionCust,
-            'comuna' => $communeCust
-        ]);
+            'comuna' => $communeCust,
+            'success' => true
+        ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'usuario no encontrado',
+                'success' => false
+            ], 404);
+        }                     
     }
 
     /**
@@ -156,6 +168,17 @@ class CustomerController extends Controller
     public function destroy(Request $request)
     {
         $customer = Customer::destroy($request->dni);
-        return $customer;
+
+        if(!$customer){
+            return response()->json([
+                'message' => 'Registro no existe',
+                'success' => false
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Customer borrado correctamente',
+            'success' => true
+        ], 200);
     }
 }
