@@ -19,9 +19,10 @@ class CustomerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        Log::debug('Mensaje de prueba');
+        $ip = $request->ip();
+        Log::info('listado de customers mostrado', ['ip' => $ip]);
 
         $statusAct = "A";
 
@@ -63,29 +64,49 @@ class CustomerController extends Controller
      */
     public function store(CustomerCreateRequest $request)
     {
-        $customer = new Customer();
-        $customer->dni = $request->dni;
-        $customer->id_reg = $request->id_reg;
-        $customer->id_com = $request->id_com;
-        $customer->email = $request->email;
-        $customer->name = $request->name;
-        $customer->last_name = $request->last_name;
-        $customer->address = $request->address;
-        $customer->date_reg = $request->date_reg;
-        $customer->status = $request->status;
+        try {
+            $regions = Region::findOrFail($request->id_reg);
+            $regionid = $regions->id;
+    
+            $commune = Commune::findOrFail($request->id_com);
+            $comunneRegId = $commune->id_reg;
+            
+            $communedef = '';
 
-        $customerNew = $customer->save();
+            if($regionid == $comunneRegId){
+                $communedef = $request->id_com;
+            }
+    
+            $customer = new Customer();
+            $customer->dni = $request->dni;
+            $customer->id_reg = $request->id_reg;;
+            $customer->id_com = $communedef;
+            $customer->email = $request->email;
+            $customer->name = $request->name;
+            $customer->last_name = $request->last_name;
+            $customer->address = $request->address;
+            $customer->date_reg = $request->date_reg;
+            $customer->status = $request->status;
+    
+            $customerNew = $customer->save();
+            Log::info('customer creado', ['ip' => $ip]);
 
-        if($customerNew){
-            return response()->json([
-                'message' => 'Customer creado correctamente',
-                'success' => true
-            ], 201);
+            if($customerNew){
+                return response()->json([
+                    'message' => 'Customer creado correctamente',
+                    'success' => true
+                ], 201);
+            
         }
-        return response()->json([
-            'message' => 'Error Al crear customer',
-            'success' => false
-        ], 500);
+        } catch (\Throwable $th) {
+            $ip = $request->ip();
+            Log::debug($th->getMessage(), ['ip' => $ip]);
+
+            return response()->json([
+                'message' => 'Error Al crear customer',
+                'success' => false
+            ], 500);
+        }
        
     }
 
@@ -97,13 +118,15 @@ class CustomerController extends Controller
      */
     public function show(Request $request)
     {
+        
         try {
-            $customers = Customer::findOrFail($request->dni);
+        $customers = Customer::findOrFail($request->dni);
         $dni = $customers->dni;
         $name = $customers->name;
         $lastName = $customers->last_name;
         $regionCustomers = $customers->id_reg;
         $communesCustomers = $customers->id_com;
+        $ip = $request->ip();
         
         $region = DB::table('regions')
             ->join('customers', 'regions.id', 'customers.id_reg')
@@ -119,6 +142,8 @@ class CustomerController extends Controller
             ->get();
         $communeCust = $commune->first();
 
+        Log::info('customer consultado', ['dni' => $dni, 'ip' => $ip]);
+
         return response()->json([
             'Dni' => $dni,
             'Nombre completo' => $name. ' '. $lastName,
@@ -129,6 +154,9 @@ class CustomerController extends Controller
             'success' => true
         ], 200);
         } catch (\Throwable $th) {
+            $ip = $request->ip();
+            Log::debug($th->getMessage(), ['ip' => $ip]);
+            
             return response()->json([
                 'message' => 'usuario no encontrado',
                 'success' => false
